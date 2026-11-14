@@ -1,0 +1,38 @@
+name: publish
+
+# Publishes `beinfi` to PyPI. Runs by hand only: the version comes from pyproject.toml.
+# Authenticates through trusted publishing (OIDC): the project on pypi.org must have this
+# repository, this workflow and the `pypi` environment as a trusted publisher.
+# There is no token.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen
+      - run: make check-generated
+      - run: make typecheck
+      - run: make test
+      - run: make build
+      - name: Examples against the sandbox before publishing
+        env:
+          INFI_SECRET_KEY: ${{ secrets.INFI_SANDBOX_SECRET_KEY }}
+        run: make examples
+      - uses: pypa/gh-action-pypi-publish@release/v1

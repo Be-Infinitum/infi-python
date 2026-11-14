@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "beinfi"
+version = "1.0.0"
+description = "Infi Python SDK, generated from the public API contract (ADR 0055)."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "BeInfi", email = "hello@beinfi.com" }]
+keywords = ["infi", "beinfi", "billing", "payments", "sdk"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+dependencies = [
+  "httpx>=0.25",
+  "pydantic>=2",
+]
+
+[project.urls]
+Homepage = "https://beinfi.com"
+Repository = "https://github.com/Be-Infinitum/infi-python"
+Issues = "https://github.com/Be-Infinitum/infi-python/issues"
+
+[dependency-groups]
+dev = [
+  # Pinned version: the output of src/beinfi/_generated/models.py must be deterministic.
+  "datamodel-code-generator==0.95.0; python_version >= '3.11'",
+  "mypy>=1.10; python_version >= '3.11'",
+  "pytest>=8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/beinfi"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/beinfi", "README.md", "pyproject.toml", "api", "scripts", "tests", "examples"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]
+
+[tool.mypy]
+# mypy no longer accepts a 3.9 target; the code is written for 3.9 and pytest runs on 3.9 in CI.
+python_version = "3.10"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "examples", "tests/typing_proof.py"]
+mypy_path = "src:examples"
+explicit_package_bases = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
