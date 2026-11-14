@@ -34,6 +34,6 @@ def paginate(fn: Callable[..., Any], **params: Any) -> Iterator[Any]:
         page = fn(query=q, **params)
         for item in _field(page, "data", "data") or []:
             yield item
-        cursor = _field(page, "nextCursor", "nextCursor")
+        cursor = _field(page, "next_cursor", "nextCursor")
         if not cursor:
             return

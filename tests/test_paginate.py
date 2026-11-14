@@ -34,3 +34,17 @@ def test_accepts_pydantic_models_and_initial_cursor():
 
     list(paginate(fn2, query={"cursor": "start"}))
     assert calls == [{"cursor": "start"}]
+
+
+def test_follows_next_cursor_on_pydantic_pages():
+    from beinfi.models import PaymentList
+
+    calls = []
+
+    def fn(query=None, **_):
+        c = (query or {}).get("cursor")
+        calls.append(c)
+        return PaymentList(data=[], nextCursor={None: "a", "a": "b", "b": None}[c])
+
+    assert list(paginate(fn, query={"limit": 10})) == []
+    assert calls == [None, "a", "b"]
